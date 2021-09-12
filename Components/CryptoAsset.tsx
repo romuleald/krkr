@@ -4,6 +4,7 @@ import {useSelector, useStore} from 'react-redux';
 import {FetchMethod, submitRequest} from '../_packages/redux-ajax';
 import {actionAdd, CryptoProps} from '../redux/crypto';
 import {getTotal} from '../redux/selectors';
+import {Link} from '@material-ui/core';
 
 type CryptoListProps = {
     cryptoList: CryptoProps[];
@@ -48,13 +49,13 @@ const CryptoAsset = ({name, quantity, price, hasTrade, currency, lastTrade}: Cry
     const pair = `${nameDisplayed}EUR`;
     const oldCurrencyPattern = hasOldName(name) ? 'Z' : '';
     const pairInResult = `${name}${oldCurrencyPattern}EUR`;
-
+    const url = `/asset/${nameDisplayed}/`;
     return <tr>
         <td>
             <button onClick={() => fetchTrade({pair, pairInResult, dispatch, name})}>up
             </button>
         </td>
-        <td>{nameDisplayed}</td>
+        <td><Link href={url}>{nameDisplayed}</Link></td>
         <td>{quantity}</td>
         <td>{hasTrade ? lastTrade : '💥'}</td>
         <td>{currency}</td>
