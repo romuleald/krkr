@@ -12,7 +12,7 @@ import {CRYPTO_STORE, cryptoReducer} from '../redux/crypto';
 import React, {useContext} from 'react';
 import {Case} from 'react-case-when';
 import {KrContext} from '../const/context';
-
+import {useLocalStorage} from '../_packages/react-use-localstorage/react-use-localstorage.esm';
 
 export const appReducers = combineReducers({
     [CRYPTO_STORE]: cryptoReducer,
@@ -37,15 +37,27 @@ global.store = makeStore({fetchFn: (url, param) => fetch(url, param).then(respon
 
 function MyApp({Component, pageProps}) {
     const [secretKey, setSecretKey] = React.useState(null);
+    const useSsrLocalStorage = (key, initial) => {
+        return typeof window === 'undefined'
+            ? [initial, (value) => undefined]
+            : useLocalStorage(key, initial);
+    };
+    const [lcl, setLcl] = useSsrLocalStorage('keyOfTheBar', '');
+
     const submitCredential = e => {
         // to sanitize
         e.preventDefault();
         const formData = new FormData(e.target);
-        setSecretKey(Object.fromEntries(formData));
+        let keysOfTheBar = Object.fromEntries(formData);
+        setSecretKey(keysOfTheBar);
+        setLcl(JSON.stringify(keysOfTheBar));
     };
-    return <KrContext.Provider value={secretKey}>
+
+    const keyOfTheBar = (lcl && JSON.parse(lcl)) || secretKey;
+
+    return <KrContext.Provider value={keyOfTheBar}>
         <Provider store={store}>
-            <Case when={secretKey === null}>
+            <Case when={keyOfTheBar === null}>
                 <form onSubmit={submitCredential}>
                     <p>
                         <label htmlFor="key">key</label>
@@ -58,7 +70,7 @@ function MyApp({Component, pageProps}) {
                     <input type="submit" value="send"/>
                 </form>
             </Case>
-            <Case when={secretKey !== null}>
+            <Case when={keyOfTheBar !== null}>
                 <Component {...pageProps} />
             </Case>
         </Provider>
