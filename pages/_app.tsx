@@ -1,39 +1,12 @@
 import '../styles/globals.css';
-import {composeWithDevTools} from 'redux-devtools-extension';
-
-import {
-    applyMiddleware,
-    combineReducers,
-    createStore
-} from 'redux';
-import {reduxAjaxMiddleware, reduxAjaxReducer, DEFAULT_REDUCER_KEY} from '../_packages/react-redux-ajax';
 import {Provider} from 'react-redux';
-import {CRYPTO_STORE, cryptoReducer} from '../redux/crypto';
-import React, {useContext} from 'react';
+import React from 'react';
 import {Case} from 'react-case-when';
 import {KrContext} from '../const/context';
-import {useLocalStorage} from '../_packages/react-use-localstorage/react-use-localstorage.esm';
+import useLocalStorage from 'react-use-localstorage';
+import {makeStore} from '../redux/store';
 
-export const appReducers = combineReducers({
-    [CRYPTO_STORE]: cryptoReducer,
-    [DEFAULT_REDUCER_KEY]: reduxAjaxReducer
-});
-
-const getStoreEnhancers = ({fetchFn}) => {
-    const middlewares = [reduxAjaxMiddleware({fetchFn})];
-    return applyMiddleware(...middlewares);
-};
-
-const composeEnhancers = composeWithDevTools({
-    // Specify name here, actionsBlacklist, actionsCreators and other options if needed
-});
-
-export const makeStore = (options) => createStore(
-    appReducers,
-    composeEnhancers(getStoreEnhancers(options))
-);
-
-global.store = makeStore({fetchFn: (url, param) => fetch(url, param).then(response => response.json())});
+const store = makeStore({fetchFn: (url, param) => fetch(url, param).then(response => response.json()), isDebug: true});
 
 function MyApp({Component, pageProps}) {
     const [secretKey, setSecretKey] = React.useState(null);

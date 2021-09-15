@@ -5,7 +5,7 @@ import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 
 import {css} from '@emotion/css';
-import {FetchMethod, useReduxAjax} from '../_packages/react-redux-ajax';
+import {RequestMethod, useReduxAjax} from '@chipp972/redux-ajax';
 import React from 'react';
 import {Header} from '../Components/Header';
 import {PrivateMethods} from '../const/method';
@@ -95,10 +95,10 @@ const ContactFormModule = () => {
         // }))
     }, []);
 
-    const fetchBalance = useReduxAjax<ApiBalance>({requestId: PrivateMethods.Balance});
+    const fetchBalance = useReduxAjax<ApiBalance>(PrivateMethods.Balance);
 
     React.useEffect(() => {
-        if (fetchBalance.response) {
+        if (fetchBalance.response?.wallet) {
             Object.entries(fetchBalance.response.wallet)
                 .forEach(([name, {quantity, price, lastTrade}]) => {
                     dispatch(actionAdd({name, quantity, price, lastTrade}))
@@ -114,7 +114,7 @@ const ContactFormModule = () => {
     React.useEffect(() => {
         const timedRefresh = () => fetchBalance.submitRequest({
             requestContent: {
-                method: FetchMethod.POST,
+                method: RequestMethod.post,
                 url: '/api/balance',
                 body: {method: PrivateMethods.Balance},
                 headers: {ctx: JSON.stringify(ctx)}

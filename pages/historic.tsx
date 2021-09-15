@@ -3,7 +3,7 @@ import styles from '../styles/Home.module.css';
 import React from 'react';
 import {Header} from '../Components/Header';
 import {storageKey} from '../const/localstorage';
-import {useLocalStorage} from '../_packages/react-use-localstorage/react-use-localstorage.esm';
+import useLocalStorage from 'react-use-localstorage';
 
 export default function Historic() {
     const useSsrLocalStorage = (key: string, initial: string): [string, React.Dispatch<string>] => {
@@ -15,13 +15,13 @@ export default function Historic() {
     const [lcl, setLcl] = useSsrLocalStorage(storageKey, '[]');
 
     return (
-        <div className={styles.container}>
+        <div>
             <Head>
                 <title>Create Next App</title>
                 <link rel="icon" href="/favicon.ico"/>
             </Head>
             <Header/>
-            <main className={styles.main}>
+            <main>
                 <table>
                     <tbody>
                     {JSON.parse(lcl).map(([time, total]) =>

@@ -2,14 +2,13 @@ import Head from 'next/head';
 
 import {css} from '@emotion/css';
 import React from 'react';
-import {useSelector, useStore} from 'react-redux';
+import {useSelector} from 'react-redux';
 import clsx from 'clsx';
-import {CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis} from 'recharts';
+import {Legend, Line, LineChart, Tooltip, XAxis, YAxis} from 'recharts';
 import {BalanceResponse} from '../../const/balanceType';
-import {KrContext} from '../../const/context';
-import {useReduxAjax} from '../../_packages/react-redux-ajax';
-import {PrivateMethods, PublicMethods} from '../../const/method';
-import {FetchMethod} from '../../_packages/redux-ajax';
+import {useReduxAjax} from '@chipp972/redux-ajax';
+import {PublicMethods} from '../../const/method';
+import {RequestMethod} from '@chipp972/redux-ajax';
 import {getAssets} from '../../redux/selectors';
 import {CryptoProps} from '../../redux/crypto';
 import {Header} from '../../Components/Header';
@@ -48,12 +47,12 @@ type ApiBalance = {
 const ContactFormModule = () => {
     const route = useRouter();
 
-    const fetchAsset = useReduxAjax<ApiBalance>({requestId: PublicMethods.Trades});
+    const fetchAsset = useReduxAjax<ApiBalance>(PublicMethods.Trades);
 
     React.useEffect(() => {
         const timedRefresh = () => fetchAsset.submitRequest({
             requestContent: {
-                method: FetchMethod.POST,
+                method: RequestMethod.post,
                 url: '/api/hello',
                 body: {method: PublicMethods.Trades, pair: 'SCEUR'}
             },
@@ -111,6 +110,7 @@ const ContactFormModule = () => {
         },
     ];
 
+    // @ts-ignore
     const lol = fetchAsset.response?.result['SCEUR'].map(item => ({
         price: item[0],
         volume: item[1],
@@ -152,7 +152,7 @@ const ContactFormModule = () => {
     );
 };
 
-export default function Home() {
+export default function Asset() {
     return (
         <div>
             <Head>

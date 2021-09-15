@@ -20,7 +20,6 @@ const calculatePrice = ({trade, quantity}): number => {
 
 export default (req, res) => {
     const ctx = JSON.parse(req.headers.ctx);
-    const parsedBody = JSON.parse(req.body);
     return client.api({ctx, method: PrivateMethods.Balance}).then(balanceResponse => {
         const allPairs = Object.keys(balanceResponse.result)
             .filter((name) => {

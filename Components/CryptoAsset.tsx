@@ -1,10 +1,10 @@
 import {PublicMethods, TickerResponse} from '../const/method';
 import React from 'react';
 import {useSelector, useStore} from 'react-redux';
-import {FetchMethod, submitRequest} from '../_packages/redux-ajax';
+import {RequestMethod, submitRequest} from '@chipp972/redux-ajax';
 import {actionAdd, CryptoProps} from '../redux/crypto';
 import {getTotal} from '../redux/selectors';
-import {Link} from '@material-ui/core';
+import Link from 'next/link';
 
 type CryptoListProps = {
     cryptoList: CryptoProps[];
@@ -18,7 +18,7 @@ const cleanNameHold = (name = '') => name.replace(/\.HOLD/, '');
 const fetchTrade = ({pair, pairInResult, dispatch, name}) => dispatch(submitRequest({
     requestId: name + PublicMethods.Trades,
     requestContent: {
-        method: FetchMethod.POST,
+        method: RequestMethod.post,
         url: '/api/hello',
         body: {
             pair,

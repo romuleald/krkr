@@ -1,4 +1,4 @@
-import {createReducer} from '../_packages/redux-helpers';
+import {createReducer} from '@chipp972/redux-helpers';
 
 export const CRYPTO_STORE = 'crypto';
 export type CryptoProps = {
