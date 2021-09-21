@@ -1,7 +1,7 @@
 import Head from 'next/head';
 
 import {css} from '@emotion/css';
-import React from 'react';
+import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
 import clsx from 'clsx';
 import {Legend, Line, LineChart, Tooltip, XAxis, YAxis} from 'recharts';
@@ -43,90 +43,50 @@ type ApiBalance = {
     total: number;
     wallet: BalanceResponse;
 };
+const since = (hours = 24) => Date.now() / 1000 - 60 * 60 * hours;
 
 const ContactFormModule = () => {
     const route = useRouter();
-
+    console.log(route.query)
     const fetchAsset = useReduxAjax<ApiBalance>(PublicMethods.Trades);
+    const [assetChartData, setAssetChartData] = useState([])
+    const [hours, setHours] = useState(24)
 
     React.useEffect(() => {
-        const timedRefresh = () => fetchAsset.submitRequest({
-            requestContent: {
-                method: RequestMethod.post,
-                url: '/api/hello',
-                body: {method: PublicMethods.Trades, pair: 'SCEUR'}
-            },
-            transformData: JSON.stringify
-        })
-        const refresh = setInterval(timedRefresh, 10000);
+        const timedRefresh = () =>
+            route.query.asset && fetchAsset.submitRequest({
+                requestContent: {
+                    method: RequestMethod.post,
+                    url: '/api/hello',
+                    body: {method: PublicMethods.Trades, pair: `${route.query.asset}EUR`, since: since(hours)}
+                },
+                transformData: JSON.stringify
+            })
+        const refresh = setInterval(timedRefresh, 20000);
         timedRefresh();
+
         return () => clearInterval(refresh);
-    }, [])
+    }, [route.query.asset, hours])
 
-    const crypto = useSelector(getAssets);
-    const cryptoList: CryptoProps[] = Object.values(crypto);
-    const data = [
-        {
-            name: 'Page A',
-            uv: 4000,
-            pv: 2400,
-            amt: 2400,
-        },
-        {
-            name: 'Page B',
-            uv: 3000,
-            pv: 1398,
-            amt: 2210,
-        },
-        {
-            name: 'Page C',
-            uv: 2000,
-            pv: 9800,
-            amt: 2290,
-        },
-        {
-            name: 'Page D',
-            uv: 2780,
-            pv: 3908,
-            amt: 2000,
-        },
-        {
-            name: 'Page E',
-            uv: 1890,
-            pv: 4800,
-            amt: 2181,
-        },
-        {
-            name: 'Page F',
-            uv: 2390,
-            pv: 3800,
-            amt: 2500,
-        },
-        {
-            name: 'Page G',
-            uv: 3490,
-            pv: 4300,
-            amt: 2100,
-        },
-    ];
+    React.useLayoutEffect(() => {
+        // @ts-ignore
+        setAssetChartData(fetchAsset.response?.result?.[`${route.query.asset}EUR`].map(item => ({
+            price: item[0],
+            volume: item[1],
+            time: new Intl.DateTimeFormat('fr-FR', {
+                year: '2-digit',
+                month: 'numeric',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric'
+            }).format(item[2] * 1000),
+            buysell: item[3],
+            marketlimite: item[4],
+            miscellaneous: item[5]
+        })))
 
-    // @ts-ignore
-    const lol = fetchAsset.response?.result['SCEUR'].map(item => ({
-        price: item[0],
-        volume: item[1],
-        time: new Intl.DateTimeFormat('fr-FR', {
-            year: 'numeric',
-            month: 'numeric',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric'
-        }).format(item[2] * 1000),
-        buysell: item[3],
-        marketlimite: item[4],
-        miscellaneous: item[5]
-    }))
-
+    }, [fetchAsset.response])
 
     return (
         <>
@@ -135,19 +95,23 @@ const ContactFormModule = () => {
                 <LineChart
                     width={600}
                     height={400}
-                    data={lol}
+                    data={assetChartData}
                     margin={{top: 5, right: 20, left: 10, bottom: 5}}
                 >
                     <XAxis dataKey="time"/>
                     <YAxis dataKey="price"/>
                     <Tooltip/>
                     <Legend/>
-                    {/*<CartesianGrid strokeWidth={1} stroke="#f5f5f5"/>*/}
                     <Line type="monotone" dataKey="price" strokeWidth={1} stroke="#ff7300" yAxisId={0}/>
                     <Line type="monotone" dataKey="time" strokeWidth={1} stroke="#ff7300" yAxisId={0}/>
                 </LineChart>
-
             </div>
+            <button onClick={() => setHours(1)}>1h</button>
+            <button onClick={() => setHours(4)}>4h</button>
+            <button onClick={() => setHours(8)}>8h</button>
+            <button onClick={() => setHours(24)}>24h</button>
+            <button onClick={() => setHours(24 * 7)}>7j</button>
+            <button onClick={() => setHours(24 * 31)}>1m</button>
         </>
     );
 };
